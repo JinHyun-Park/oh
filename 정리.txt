@@ -1,0 +1,76 @@
+1. http://msaez.io/ 에서 모델링
+2. 모델링에서 소스생성 
+3. 인텔리지에서 소스 작업
+(gateway 의 application.yml 수정(쉼표,) Path=/deliveries/**,/cancellations/**)
+(로컬이랑 서버에서 접근할때 url 주소 변수로 url="${api.url.delivery}")
+4. 카프카설치경로에서 주키퍼 실행 (카프카/bin/windows)
+zookeeper-server-start.bat ../../config/zookeeper.properties
+5.카프카설치경로에서 카프카 실행  (카프카/bin/windows) 
+kafka-server-start.bat ../../config/server.properties
+6.인텔리J 에서 mvn(메이븐)- 스프링부트 - run 으로 실행
+-----------------------------------------------------------------------
+7. 모니터링
+#windows
+kafka-console-consumer.bat --bootstrap-server http://localhost:9092 --topic demo --from-beginning
+#리눅스
+kafka-console-consumer.sh --bootstrap-server http://localhost:9092 --topic demo --from-beginning
+-----------------------------------------------------------------------
+8.각 MSA 설정 등 소스코딩하고 데이터 입력 등등
+# HTTP 설치
+https://github.com/TheOpenCloudEngine/uEngine-cloud/wiki/Httpie-설치
+# 온라인툴
+https://httpie.org/run
+# 전체목록(뒤에 S 붙임)
+http GET http://jsonplaceholder.typicode.com/todos
+http GET http://localhost:8083/mypages
+# 생성
+http POST http://localhost:8081/orders productId=1003 qty=10
+# 전체수정
+http PUT http://jsonplaceholder.typicode.com/todos/198 userId=12
+# 부분수정
+http PATCH http://jsonplaceholder.typicode.com/todos/198 userId=12
+# 삭제
+http DELETE http://jsonplaceholder.typicode.com/todos/19
+-----------------------------------------------------------------------
+9. CMD 에서 소스 git hub에 올리기 
+#소스 위치로 이동 (C:\Users\SKCC\Downloads\demo_one\order)
+git init
+git config --global user.name j~~
+git config --global user.email j~~
+git config --list #config 내용 확인(깃허브에 커밋할때 본인확인용도)
+제어판 자격증명관리자 clear (다른사람정보)
+git remote add origin https://github.com/skcc07/demo_one  #원격저장소등록 
+git remote -v   #목록보기
+git add .
+git commit -m "1st commit"
+git push -u origin master #현재위치에 있는 모든 소스를 원격저장소에 올리기
+-----------------------------------------------------------------------
+10. git hub 에 있는 소스 우분투로 가져옴
+git clone https://github.com/skcc07/mypage.git
+(cd mypage 에서 실행)
+mvn clean  # 타겟 클린하고 시작
+mvn package #타겟 다시 생성됨을 확인
+docker images #이미지 확인
+docker #아마존 이미지 네이밍룰에 맞게 올리기
+----------------------------------------------------------------------------------------
+10. AWS 인증 설정
+- https://kcloud-academy.signin.aws.amazon.com/console
+- IAM -사용자-보안자격증명 : 액세스 키 만들기
+- aws configure #우분투에서 액세스키 입력
+#AWS 자격증명
+A
+A
+- AWS 클러스터 생성 (완료되면 EC2 에서 확인)
+eksctl create cluster --name 클러스터 --version 1.15 --nodegroup-name standard-workers --node-type t3.medium --nodes 3 --nodes-min 1 --nodes-max 3
+----------------------------------------------------------------------------------------
+11. AWS 에 이미지 올리기
+- ECR 리포지토리 생성 - 리포지토리 이름 저장
+:이미지 스캔 설정 활성화로 하면 취약점 분석을 알아서 클라우드에서 해줌
+- 이미지 생성
+docker build -t 이미지이름:v1 .
+docker images #생성된 이미지 확인
+- AWS 컨테이너 레지스트리 로그인
+aws ecr get-login-password --region 리전 | docker login --username AWS --password-stdin AWS정보
+- 도커 푸시
+docker push 이미지이름:v1
+- ECR 에서 이미지 확인
