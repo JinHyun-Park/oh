@@ -8,6 +8,9 @@
 
 [http://msaez.io](http://msaez.io)
 
+## msaez 소스 자동 생성 후 수정사항
+https://github.com/aimmvp/cna-demo#cna-demo-project
+
 ## 처음에만!
 ```sh
 $ git clone https://github.com/aimmvp/oh.git
