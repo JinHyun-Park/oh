@@ -1,0 +1,179 @@
+eksctl create cluster --name admin16-Cluster --version 1.15 --nodegroup-name standard-workers --node-type t3.medium --nodes 3 --nodes-min 1 --nodes-max 3
+
+arn:aws:iam::052937454741:role/eksctl-admin16-Cluster-cluster-ServiceRole-CM7M4GV2Y2FW
+
+admin16@admin16-Cluster.ap-southeast-2.eksctl.io
+
+
+aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 052937454741.dkr.ecr.ap-southeast-2.amazonaws.com
+
+aws ecr create-repository --repository-name 052937454741.dkr.ecr.ap-southeast-2.amazonaws.com/admin16-my-nginx:v2 --region ap-southeast-2
+
+
+docker push 052937454741.dkr.ecr.ap-southeast-2.amazonaws.com/admin16-my-nginx:v2 
+
+kubectl label nodes ip-192-168-0-190.ap-southeast-2.compute.internal disktype=ssd
+
+kubectl annotate deploy nginx-deployment kubernetes.io/change-cause='v1 is nginx:1.9.1'  ==>nginx image 가 1.7.9로 바꿈
+
+kubectl rollout undo deploy nginx-deployment --to-revision 1  ==>1번 버전으로 변경해서 수행되도록 변경.
+
+kubectl get hpa php-apache -o yaml : sieze detail 한 화일을 설정. 
+
+sieze 에  필요한 base image 를 만들어줌.
+
+
+fs-f55eb1cd.efs.ap-southeast-2.amazonaws.com 파일시스템 복사
+fs-f55eb1cd 파일시스템 ID
+
+
+config maps 
+
+kubectl create configmap hello-cm --from-literal=language=java ==>(key value)
+
+ingress external IP
+a389b104066804ecbbf36b50cd068fc4-2416604.ap-southeast-2.elb.amazonaws.com
+
+--- 객체 구분자 (3개 ---) 
+
+nginx-blue-deployment.yamlapiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-blue-deployment
+  namespace: ingress-basic
+  labels:
+    app: blue-nginx-deploy
+spec:
+  replicas: 1  ==> replicas 수에 따라 image 를 복제  L4로 묶여서
+  selector:
+    matchLabels:
+      app: blue-nginx
+  template:
+    metadata:
+      labels:
+        app: blue-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: 052937454741.dkr.ecr.ap-northeast-2.amazonaws.com/user09-nginx-blue:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-blue-svc
+  namespace: ingress-basic
+spec:
+  selector:
+    app: blue-nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: NodePort
+  
+  kubectl get all --namespace=ingress-basic
+
+  052937454741.dkr.ecr.ap-southeast-2.amazonaws.com/admin16-my-nginx-blue
+  
+  docker build -t a389b104066804ecbbf36b50cd068fc4-2416604.ap-southeast-2.elb.amazonaws.com/admin16-my-nginx-blue:latest  .
+  
+  aws ecr create-repository --repository-name admin16-my-nginx-blue --region ap-southeast-2
+  
+  docker push 052937454741.dkr.ecr.ap-southeast-2.amazonaws.com/admin16-my-nginx-blue:latest 
+  
+  docker build -t 052937454741.dkr.ecr.ap-southeast-2.amazonaws.com/admin16-my-nginx-blue:latest  .
+
+aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 052937454741.dkr.ecr.ap-southeast-2.amazonaws.com
+
+docker build -t 052937454741.dkr.ecr.ap-southeast-2.amazonaws.com/admin16-my-nginx-green:latest  .
+
+aws ecr create-repository --repository-name admin16-my-nginx-green --region ap-southeast-2
+
+docker push 052937454741.dkr.ecr.ap-southeast-2.amazonaws.com/admin16-my-nginx-green:latest 
+
+aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 052937454741.dkr.ecr.ap-southeast-2.amazonaws.com
+
+
+export ECR=052937454741.dkr.ecr.ap-southeast-2.amazonaws.com
+
+docker build -t 052937454741.dkr.ecr.ap-southeast-2.amazonaws.com/admin16-products:latest .
+
+aws ecr create-repository --repository-name admin16-products --region ap-southeast-2
+
+docker push ${ECR}/admin16-products:latest
+
+kubectl create deploy admin16-products --image=${ECR}/admin16-products:latest
+
+kubectl expose deploy admin16-products --type="ClusterIP" --port=8080
+
+export ECR=052937454741.dkr.ecr.ap-southeast-2.amazonaws.com
+
+export IMAGENAME=admin16-orders 
+
+docker build -t ${ECR}/${IMAGENAME}:latest .
+
+aws ecr create-repository --repository-name ${IMAGENAME} --region ap-southeast-2
+
+export IMAGENAME=admin16-delivery
+
+aws ecr create-repository --repository-name ${IMAGENAME} --region ap-southeast-2
+
+export IMAGENAME=admin16-oauth
+
+aws ecr create-repository --repository-name ${IMAGENAME} --region ap-southeast-2
+
+export IMAGENAME=admin16-gateway
+
+aws ecr create-repository --repository-name ${IMAGENAME} --region ap-southeast-2
+
+export IMAGENAME=admin16-ui
+
+aws ecr create-repository --repository-name ${IMAGENAME} --region ap-southeast-2
+
+_GATEWAY_IP= 52.62.45.52
+
+metadata:
+  name: ${IMAGENAME}
+  labels:
+    app: ${IMAGENAME}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${IMAGENAME}
+  template:
+    metadata:
+      labels:
+        app: ${IMAGENAME}
+    spec:
+      containers:
+        - name: ${IMAGENAME}
+          image: ${ECR}/${IMAGENAME}:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: VUE_APP_API_HOST
+              value: http://52.65.42.52:8080
+EOF
+
+
+
+ad648588da07a47b2b59bfdccab84642-824380630.ap-southeast-2.elb.amazonaws.com:16686
+ac5ebb2b1aa594f15bef30932e9a608e-495217961.ap-southeast-2.elb.amazonaws.com:20001
+
+curl -A Safari External-IP:8080
+
+
+
+
+
+
+
+
+
+
+
+
+

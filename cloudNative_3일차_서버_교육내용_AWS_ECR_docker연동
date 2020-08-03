@@ -1,0 +1,91 @@
+﻿1. AWS Setting 
+인증값 넣기.(업로드금지)
+us-east-1
+eksctl create cluster --name user16--cluster --version 1.15 --nodegroup-name standard-workers --node-type t3.medium --nodes 3 --nodes-min 1 --nodes-max 3
+
+aws,eksctl,kubectl,locker
+
+ap-northeast-1
+
+modeling 동기호출 
+
+2. Git local 셋팅 후 clone 진행.
+git clone https://github.com/picturesque0930/cna-delivery.git
+git clone https://github.com/picturesque0930/cna-mypage.git
+git clone https://github.com/picturesque0930/cna-gateway.git
+
+052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-gateway
+cd dir>>  
+mvn clean
+mvn package
+
+ECR -amazon elastic repository
+
+AWS 리포지토리 생성시 
+052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/
+image scan 설정 활성화 해줌  (조치 및 리포트 해서 알려줌)
+
+052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-order
+052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-mypage
+
+ docker build -t 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-order:v1 .
+ docker build -t 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-delivery:v1 .
+  docker build -t 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-mypage:v1 .
+    docker build -t 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-gateway:v1 .
+	052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-gateway
+ 이미지 구운거 확인 docker images
+ 
+ aws ecr get-login-password --region ap-northeast-1 | docker login --user16--cluster AWS --password-stdin 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com
+ 
+
+
+aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com
+
+-- aws ecr create-repository --repository-name cfd353208341 --region ap-northeast-2
+aws ecr create-repository --repository-name 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-order --region ap-northeast-1
+
+
+
+docker push 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-order:v1
+docker push 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-delivery:v1
+docker push 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-mypage:v1
+docker push 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-gateway:v1
+
+052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-order
+
+원본 docker push 283210891307.dkr.ecr.ap-northeast-2.amazonaws.com/(IMAGE_NAME):latest
+
+
+
+final assessment
+deployment.yml
+
+서비스 별로 구성하고 헬스 체크해주는 부분을 구현해주어야 함.
+   httpGet:
+              path: '/actuator/health'
+			  
+
+product repository에서 			  
+
+ECR
+user16-cna-delivery
+
+ubuntu
+git clone -> code (복사 내려받기)
+
+mvn clean 
+mvn package
+
+ls docker build 
+
+052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-delivery
+
+aws 리포지토리 생성에서 docker build  v1 
+cna-delivery : docker build -t 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-order:v1 .
+
+인증 토큰 
+aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin (Account-ID).dkr.ecr.ap-northeast-2.amazonaws.com
+aws ecr get-login-password --region ap-northeast-1 | docker login --user16--cluster AWS --password-stdin 052937454741.dkr.ecr.ap-northeast-1.amazonaws.com
+
+docker push 444.dkr.ecr.eu..amazonaws.com /user16-cna-delivery:v1
+

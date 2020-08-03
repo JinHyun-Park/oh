@@ -1,0 +1,216 @@
+20200729 교육 과정 
+
+8083 확인
+netstat -ano | findstr "PID :808"
+
+http http://localhost:8083
+
+
+zookeeper-server-start.bat ../../config/zookeeper.properties
+
+kafka-console-consumer.bat --bootstrap-server http://localhost:9092 --topic shop --from-beginning
+
+kafka-console-consumer.bat --bootstrap-server http://localhost:9092 --topic mypage --from-beginning
+
+http http://localchost:8081/orders productId=1001  qty=3
+
+
+watch kubectl get all -n kafka
+
+kafka . istio 설치 
+kubectl 에 설치를 하는 것임. ubuntu (local) 에 설치하는 것이 아님.
+
+설치 후 모니터링 
+kubectl get pod -n istio-system
+watch kubectl get all -n kafka
+
+path 정보가 빠져있어 추가
+export PATH=$PWD/bin:$PATH:/usr/local/:/usr/local/bin
+
+
+
+side car 처리  배포 담당자가 챙겨줄 작업
+kubectl apply -f <(istioctl kube-inject -f Deployment.yml) -n istio-test-ns
+kubectl label namespace istio-test-ns istio-injection=enabled
+
+
+kubectl create namespace istio-cb-ns
+
+kubectl get ns istio-cb-ns -o yaml
+
+
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-server-1
+  namespace: istio-cb-ns
+  labels:
+    app: hello
+spec:
+  containers:
+  - name: hello-server-1
+    image: docker.io/honester/hello-server:latest
+    imagePullPolicy: IfNotPresent
+    env:
+    - name: VERSION
+      value: "v1"
+    - name: LOG
+      value: "1"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-server-2
+  namespace: istio-cb-ns
+  labels:
+    app: hello
+spec:
+  containers:
+  - name: hello-server-2
+    image: docker.io/honester/hello-server:latest
+    imagePullPolicy: IfNotPresent
+    env:
+    - name: VERSION
+      value: "v2"
+    - name: LOG
+      value: "1"
+    - name: RANDOM_ERROR
+      value: "0.2"
+---  ==>객체 구분자 
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-hello
+  namespace: istio-cb-ns
+  labels:
+    app: hello
+spec:
+  selector:
+    app: hello
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8080
+EOF
+
+클라이언트용 Pod 설치
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: httpbin
+  namespace: istio-cb-ns
+  labels:
+    app: httpbin
+spec:
+  containers:
+  - name: httpbin
+    image: docker.io/honester/httpbin:latest
+    imagePullPolicy: IfNotPresent
+EOF
+
+kubectl logs -f hello-server-2 -c hello-server-2 -n istio-cb-ns
+
+테스트 결과 rouind robin이 완벽한지는 모르겠다.
+
+ 두꺼비집 설치.
+ 카나리에서 v1- 80 v2 - 20 % 하는 행동을 했었음.
+ 
+ 3분간 정지 option 설치 
+ 
+ kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: dr-hello
+  namespace: istio-cb-ns
+spec:
+  host: svc-hello
+  trafficPolicy:
+    outlierDetection:
+      interval: 1s
+      consecutiveErrors: 1
+      baseEjectionTime: 3m
+      maxEjectionPercent: 100
+EOF
+ 
+두꺼비짐으로 차단. -- kafka만 살아있으면 분배가 가능한다.
+
+두꺼비집 다시 삭제 (차단안됨)
+kubectl delete dr dr-hello -n istio-cb-ns
+
+deployment.yml 파일 수정
+
+kubectl create -f deployment.yml
+kubectl create -f service.yaml
+
+Pod 이름 확인
+kubectl get all -n istio-cb-ns
+
+log 모니터링
+kubectl logs pod/order-cd67bf48b-jsm2m -n istio-cb-ns -c order
+
+Service 상태 확인 (pod, service 정상 확인)
+kubectl get all -n istio-cb-ns
+ kubectl get all -n kube-system (deployment.apps/coredns 를 확인할 수 있다.- 레코드가 생성되고 삭제되고 한다.)
+
+kubectl monitoring
+
+정상 kafka-console-consumer.bat --bootstrap-server http://localhost:9092 --topic local --from-beginning
+kubectl -n kafka exec -ti my-kafka-0 -- /usr/bin/kafka-console-consumer --bootstrap-server my-kafka:9092 --topic local --from-beginning
+ 
+kubectl -n kafka exec -ti my-kafka-0 –- /usr/bin/kafka-console-consumer --bootstrap-server my-kafka:9092 --topic local --from-beginning
+
+
+cat <<EOF | kubectl apply -f -
+apiVersion: "v1"
+kind: "Pod"
+metadata: 
+  name: httpie
+  namespace: istio-cb-ns
+  labels: 
+    name: httpie
+spec: 
+  containers: 
+    - name: httpie
+      image: clue/httpie
+      command:
+        - sleep
+        - "360000"
+EOF/
+
+
+ kubectl exec -ti pod/httpie -n istio-cb-ns -c httpie -- /bin/bash
+ 
+ 코드 수정시 수정 하여, pull을 진행해서 v2로 apply 하시유
+ 
+ 
+Gateway yaml 화일 API로 생성
+skccadmin@SKCC16D00084:~$ kubectl create deploy cna-gatgeway --image=052937454741.dkr.ecr.ap-northeast-1.amazonaws.com/user16-cna-gateway:v1 -n istio-cb-ns
+ 
+kubectl expose deploy cna-gatgeway --type=LoadBalancer --port=8080 -n
+ istio-cb-ns
+service/cna-gatgeway exposed 
+
+internet 구간 오픈
+a154847e3cfa14215b0c9e0b3b1c37ca-579909507.ap-northeast-1.elb.amazonaws.com
+
+ 실행이 안됨.
+ http a154847e3cfa14215b0c9e0b3b1c37ca-579909507.ap-northeast-1.elb.amazonaws.com:8080/orders productId=1002 qty=5
+
+Command 'http' not found, but can be installed with:
+
+sudo apt install httpie
+
+
+eventstorming
+eventmodeling
+stateful 하지 않음. stateless
+microservice poligratan language 따로 가져갈 수 있다.
+domain 간에는 shared..  anti gr... 상관관계 없다.
+MSA 배경 uptime을 높이고자. 시스템을 떼내고자  time ..유연한 event driven 
+스파게티- 동기구조
+CQRS - command query 모니터링
+UI - serverside X bottleneck . client side rendering 
+gateway - MSA 인터넷 구간 . 클러스터로 연계함.

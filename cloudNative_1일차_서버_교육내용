@@ -1,0 +1,71 @@
+﻿github.com/event-storming/docs
+http://msaschool.io/
+http://msaez.io/
+
+java spring boot
+httpie 라는 것을 rest api 로 씀.
+
+http put 시 전체 data 수정
+ patch 를 주어야 일부 data 수정됨.
+ 
+ httppie.org - self healing 이 가능한 테스트 서버
+ 
+ http get  http://jsonplaceholder.typicode.com/todos
+ ==>read
+ http POST http://jsonplaceholder.typicode.com/todos completed=true id=201 title=“TEST” userId=11 
+  ==> 추가 해주는 API
+  
+  http delete http://jsonplaceholder.typicode.com/todo/198 ==>삭제하기
+  
+  Aggeregate - 뗄레야 뗄 수 없는 결합물..
+  External System - 외부에 시스템 (택배)
+  View - User View를 기반으로 command 결정.
+  
+  bounded context
+  pub sub(비동기 publish subscribe)안무 - event listening 해서 처리(policy에 준하는 실행)
+  req res(동기) waiting . orchestration 방식 
+  
+  spring initializr - H2 DB 추가 (memory DB)
+  SPRING data JPA - ORM 
+  REST Repository - command event .. 자동으로 만들어줌.
+  
+  initializr demo.zip 생성 - pom.xml
+  pom.xml 에 추가된 plugin 들이 등장해서 maven 에서 볼수있음.
+  
+<status 확인>
+  netstat -ano |findstr PID :808
+  taskkill /pid 18264 /f
+  
+  maven spring -boot 
+  
+  복수형으로 만들어줌.
+  
+  JPA triggering point 를 준다.  event aggregate 하도록 하여줌
+  
+  @PostPersist
+  @PrePersist
+  
+  @PostUpdate
+  @PreUpdate
+  
+  @PostRemove
+  @PreRemove
+  
+  spring version 2.3 에 따른 version 등록
+    <properties>
+		<java.version>1.8</java.version>
+		<spring-cloud.version>Hoxton.SR3</spring-cloud.version>
+	</properties>
+	
+	application.properties yaml 파일처럼 등록
+	
+	kafka-console-consumer.bat --bootstrap-server http://localhost:9092 --topic shop --from-beginning
+	
+	http http://localhost:8080/products
+	
+	 http get  http://jsonplaceholder.typicode.com/todos
+	 
+	 http http://localhost:8080/profile/products ==> profile에 있는 products 리스트를 불러와서 볼수 있겠다.
+	 
+	 자동 복사되는데... auto binding 된다.  그러므로 변경 삭제에 대한 member 변수가 들어온다.
+	 

@@ -1,0 +1,59 @@
+﻿Pipelin e
+
+contract test
+ 기존 프로토콜을 유지하면서, 사용할 수 있게 하는 테스트
+ CDC - consumer deliver ... consumer driven test .consumer driven contract
+ 
+ https://github.com/event-storming/container-orchestration
+ 
+ user09@SKCC16D00078:~/git-repo$ git config --global user.name picturesque
+user09@SKCC16D00078:~/git-repo$ git config --global user.email picturesque@naver.com
+
+
+
+git commit -m "1st commit"
+
+git remote add origin https://github.com/picturesque0930/cicd-repo.git 
+==> remote repo 를 local repo 에 붙이는 작업. 
+
+git remote -v
+
+git push -u origin master 
+==>origin 이른s remote (master) brance 에다가 연결
+
+push 대상 : local  commit file 
+ 
+ git pull 
+  변경된 대상 땡겨오기.
+ git log 
+  log 확인하기.
+  
+ codebuild
+ 
+ codecommit
+ 
+ codedeploy - 
+ 
+ codepipeline - 굴비엮듯이 엮는다.
+ 
+ codestar - devops portal (PASS 환경까지 제공)
+ 
+ codecommit admin16
+ 
+ admin16-at-052937454741 
+ Iym4wS9NikS6v9/xUmLh1i3zmkPxkGxN17oPmCI1uyI=
+ 
+ codedeploy  admin16-EKS 가 없다............? 
+ 
+ auth 처리할때 순차적으로... 리전별
+ 
+webhook을 걸어주어야 한다.
+
+codebuild ECR 엔드포인트
+ 
+ https://9C2509C25E343B343A577A3BFC3F795D.yl4.ap-southeast-2.eks.amazonaws.com
+
+4. kubectl apply -f eks-admin-cluster-role-binding.yaml
+
+token
+e (긴거)

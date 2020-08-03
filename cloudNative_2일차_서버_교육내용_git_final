@@ -1,0 +1,91 @@
+Final Project
+			참고교육 사이트 - https://workflowy.com/s/msa/27a0ioMCzlpV04Ib
+CICD github 등의 환경 구성. 		
+
+<git 구성>
+git remote add origin https://github.com/picturesque0930/cna-order2.git
+git remote add origin https://github.com/picturesque0930/cna-mypage.git
+                      https://github.com/picturesque0930/cna-mypage.git
+					  https://github.com/picturesque0930/cna-gateway.git
+git remote add origin https://github.com/picturesque0930/cna-gateway.git
+C:\Users\SKCC\Downloads\demo (1)>cd order
+
+C:\Users\SKCC\Downloads\demo (1)\order>git init
+Initialized empty Git repository in C:/Users/SKCC/Downloads/demo (1)/order/.git/
+
+C:\Users\SKCC\Downloads\demo (1)\order>git remote add origin https://github.com/picturesque0930/cna-order2.git
+
+C:\Users\SKCC\Downloads\demo (1)\order>git remote -v
+origin  https://github.com/picturesque0930/cna-order2.git (fetch)
+origin  https://github.com/picturesque0930/cna-order2.git (push)
+
+C:\Users\SKCC\Downloads\demo (1)\order>git status
+
+git add .\ 
+git commit -m testcna
+
+git commit -m "first commit"
+git push -u origin master
+
+git remote set-url origin https://picturesque0930@github.com/picturesque0930/cna-order2.git
+
+Git push 진행 시 windows 자격증명  수정해주어야 함.
+
+kcloud-academy
+skcc16/skccadmin1234!
+
+
+
+
+slave ... read 
+
+kafka
+ - Topic - data 통로
+ - Broker - 1개만 read 할 수 있음. 나머지는 복제...........(replica)
+ 
+ hexagonal architecture
+ shipped
+ 
+ package name - yml file destination 변경
+ 
+ pre persist
+ 2개씀
+- post persist - data 날린 후 보냄. 
+- Pre Remove 
+ 
+ - Story line 에 따른 modeling 이 진행되어야 함.
+ 
+ -amazon CICD . github push 필수는 아님.
+ 
+ Dockerfile - openjdk / 가 없음. Docker -+official image 로 가져오는 것임. (tag의 image를 끌어당김)
+ 
+ add as maven project (pom.xml)
+ 
+ 동기호출
+  external folder 에 화일을 만들어줌
+  
+  cancelationService.java
+  @FeignClient(name="delivery", url="http://delivery:8080")
+     @RequestMapping(method= RequestMethod.POST, path="/cancelations")
+	이렇게 호출됨 --> "http://delivery:8080")/cancelations")
+	
+base에 path 붙여서 call 한다고 보면됨.
+
+교체 - @FeignClient(name="delivery", url="${api.url.delivery}")
+ {} 중괄호임
+application.yaml 
+
+api:
+  url:
+    delivery: http://localhost:8082
+	
+api:
+  url:
+    delivery: http://delivery:8082
+	
+동기호출 pain 이든 rest API든 상관없다.
+
+gateway application.yml
+         predicates:
+            - Path=/cancelations/**, /deliveries/** 
+	
