@@ -8,8 +8,11 @@
 
 [http://msaez.io](http://msaez.io)
 
-## msaez 소스 자동 생성 후 수정사항
+## 1. msaez 소스 자동 생성 후 수정사항
 https://github.com/aimmvp/cna-demo#cna-demo-project
+
+## 2. AWS Upload
+https://github.com/aimmvp/oh/blob/master/AWS%20Upload.md
 
 ## 처음에만!
 ```sh
