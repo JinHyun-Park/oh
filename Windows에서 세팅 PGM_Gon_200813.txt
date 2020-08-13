@@ -1,7 +1,7 @@
 [Windows 짜응에 파일 설치하기]
 
   1. Ubuntu
-    - https://docs.microsoft.com/ko-kr/windows/wsl/install-win10
+    - https://docs.microsoft.com/ko-kr/windows/wsl/install-manual
       (여기서 18 버전 깔았음)
 
   2. docker Toolbox
