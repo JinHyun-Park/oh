@@ -1,0 +1,11 @@
+[Windows 짜응에 파일 설치하기]
+
+  1. Ubuntu
+    - https://docs.microsoft.com/ko-kr/windows/wsl/install-win10
+      (여기서 18 버전 깔았음)
+
+  2. docker Toolbox
+    - https://docs.docker.com/toolbox/toolbox_install_windows
+
+  3. Kafka
+    - 
