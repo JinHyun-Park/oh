@@ -1,0 +1,76 @@
+################################CICD CodeBuilder################################## 아마존에서 CodeBuilder
+	1. 빌드 프로젝트 생성 <프로젝트 구성>
+	• 프로젝트 이름: ECR과 비슷하게 설정
+  
+<소스>
+	• 소스공급자: GitHub
+	• 리포지토리: 내 GitHub 계정의 리포지토리 >> 리포지토리 선택
+  
+<기본 소스 Webhoo 이벤트> "코드 변경이 이 리포지토리에 푸쉬될 때마다 다시 빌드" 체크!!
+이것을 설정해야 git에서 소스가 변경될 때 마다 다시 배포가 일어남 <환경>
+
+<환경>
+	• 환경 이미지: 관리형 이미지
+	• 운영 체제: Ubuntu
+	• 런타임: Strandart
+	• 이미지: aws/codebuild/standard:3.0
+	• 이미지 버전: 이 런타임 버전에 항상 최신 이미지 사용
+	• 환경 유형: Linux
+	• 권한이 있음: 체크
+	• 서비스 역할: 새 서비스 역할
+	• 역할 이름: 프로젝트 이름으로 자동 생성
+	(추가 구성 열기)
+	• 환경 변수 추가(3개로)
+	• 이름: AWS_ACCOUNT_ID 값: 아래 명령으로 Ubuntu에서 조회한 값 
+		○ echo $(aws sts get-caller-identity --query Account --output text) 
+		○ 351904566406
+	• 이름: KUBE_URL 값: EKS 클러스터의 API 서버 엔드포인트 주소 입력 
+		○ https://261BCFFD57096C31028310549E9704AC.sk1.ap-northeast-2.eks.amazonaws.com
+	• 이름: KUBE_TOKEN 값: WorkFloy "CodeBuild 와 EKS 연결" yaml 생성하는 부분을 Ubuntu에서 수행 후 아래 명령어 수행 결과 token 값 
+	cat <<EOF | kubectl apply -f - 
+	apiVersion: v1 
+	kind: ServiceAccount 
+	metadata:  
+	    name: eks-admin
+	   namespace: kube-system 
+	EOF
+	• 명령어 수행: kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep eks-admin | awk '{print $1}') 
+		○ eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJla3MtYWRtaW4tdG9rZW4tc2QybGIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZWtzLWFkbWluIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiN2QxYWJmOGUtZTliYS00N2M3LWIyZjMtNWRmMGVhOTYxYjkxIiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50Omt1YmUtc3lzdGVtOmVrcy1hZG1pbiJ9.dXVCj4rEByukHV6XiEWW6uyoDi6CdXZZQZIWP6DL-JcDugW9Ab82Ewe71K_ngGtgBEoqt7fNAisEcOBx5lBFUM-C9uobkECd1ugWOidlajkI2b9h0wH4tRkNuz_i0C-cQPTyvtU9BHK7ajuCaY7GUEnK7HzLksA4ykHgUfdNmsE3HKcswZvFOnSLaYGC8sLyb6g9ougx6AYXQMEbFki4LIFvK5sAS5U6wSMLtud3s6__DY1uww-lsG01LSwOR2Gk8uX1PeSt_prkBjruAfPZrSytjUxsoY6LSNccoHlFaR3jKMupgrkLEF_NSrau04fhsAQNM1ZgjOU9LYpyvgny2g
+	• 이름: AWS_DEFAULT_REGION 값: ap-northeast-2 (안넣어도 됨)
+  
+<Buildspec>
+	• 빌드 사양: buildspec 파일 사용 체크
+
+1번 완료: 빌드 프로젝트 생성
+
+	2. CodeBuild와 ECR 연결 정책 설정
+	• 프로젝트 빌드 > 빌드 선택 > 빌드 세부정보 > 환경 > 서비스 역할 > 정책이름 선택 > 정책 편집 > JSON 아래에 내용 넣고 정책 저장 "Statement": [ 다음
+	{
+	      "Action": [
+	        "ecr:BatchCheckLayerAvailability",
+	        "ecr:CompleteLayerUpload",
+	        "ecr:GetAuthorizationToken",
+	        "ecr:InitiateLayerUpload",
+	        "ecr:PutImage",
+	        "ecr:UploadLayerPart"
+	      ],
+	      "Resource": "*",
+	      "Effect": "Allow"
+	 },
+	입력
+	• 정책 검토
+	• 저장
+	
+	3. Buildspec.yaml 을 프로젝트 마다 넣기
+	4. 프로젝트 빌드에서 빌드 저장
+
+[결국 해결 못함]
+	1. 빌드 오류가 발생할 경우 buildspec.yml(git hub 루트에 있음)의 PROJECT_NAME 이 내부적으로 ECR 이름 및 서비스명으로 쓰임
+ex1) docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$_PROJECT_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION . 
+ex2)| cat <<EOF | kubectl apply -f - apiVersion: v1 kind: Service metadata: name: $PROJECT_NAME labels: app: $PROJECT_NAME
+빌드 중 1번 구간에서 오류 발생하는 경우 ECR이름과 달라 ECR을 찾지 못해 발생했으므로 이 값을 ECR과 동일하게 변경해주면 되나 언더바_가 들어갈 경우 2번 구간에서 서비스명 설정하면서 오류가 발생함
+해결방안1) 처음부터 언더바_는 사용하지 말고 대시-로 사용할 것 
+해결방안2) 서비스명 변수를 별도로 설정하여 ECR설정부외에서는 서비스명을 사용, ECR주소에 사용된 부분외에는 다 _PROJECT_NAME -> _SERVICE_NAME로 치환하면됨
+ex) env: variables: _PROJECT_NAME: "t5_order" _SERVICE_NAME: "order"
+	• docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$_PROJECT_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION .
+		○ | cat <<EOF | kubectl apply -f - apiVersion: v1 kind: Service metadata: name: $_SERVICE_NAME labels: app: $_SERVICE_NAME
